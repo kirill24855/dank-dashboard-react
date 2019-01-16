@@ -31,5 +31,6 @@
   ],
   "devDependencies": {
     "gh-pages": "^2.0.1"
-  }
+  },
+  "homepage": "https://kirill24855.github.io/dank-dashboard-react"
 }
