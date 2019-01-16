@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.2/workbox-sw.js");
 
 importScripts(
-  "/dank-dashboard-react/precache-manifest.1f226bf8ee96f13545e009d3d33dffa4.js"
+  "/dank-dashboard-react/precache-manifest.610a0dd61c1c273116f5900b0371376a.js"
 );
 
 workbox.clientsClaim();
