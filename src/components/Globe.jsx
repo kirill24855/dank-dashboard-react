@@ -288,7 +288,7 @@ export default class Globe extends Component {
 		// earth texture
 		let earth = new THREE.Group();
 		this.gScene.add(earth);
-		new THREE.TextureLoader().load("/data/img/earthnight8k.jpg", tex => {
+		new THREE.TextureLoader().load("data/img/earthnight8k.jpg", tex => {
 			let geometry = new THREE.SphereGeometry(0.999, 360, 180); // at 0.995, markers are at 32km above sea level
 			let material = new THREE.MeshBasicMaterial({map: tex, overdraw: 0.5/*color: 0x050505*/});
 			let mesh = new THREE.Mesh(geometry, material);
@@ -299,8 +299,8 @@ export default class Globe extends Component {
 		});
 
 		// load borders
-		this.addBordersToScene(await loadBorders("/data/maps/worldBorders.json"), earth);
-		this.addBordersToScene(await loadBorders("/data/maps/state/stateBorders.json"), earth);
+		this.addBordersToScene(await loadBorders("data/maps/worldBorders.json"), earth);
+		this.addBordersToScene(await loadBorders("data/maps/state/stateBorders.json"), earth);
 
 		this.addMarkersToScene(2, 12, earth);
 
