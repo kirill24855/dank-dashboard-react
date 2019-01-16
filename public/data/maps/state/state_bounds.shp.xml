@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE metadata SYSTEM "http://www.fgdc.gov/metadata/fgdc-std-001-1998.dtd">
+<metadata>
+	<idinfo>
+		<citation>
+			<citeinfo>
+				<origin>Valerie Paskevich</origin>
+				<pubdate>2005</pubdate>
+				<title>STATE_BOUNDS: internal US state boundaries</title>
+				<edition>1.0</edition>
+				<geoform>vector digital data</geoform>
+				<onlink>http://pubs.usgs.gov/of/2005/1001/data/basemaps/boundaries/state_bounds/state_bounds.zip</onlink>
+				<onlink>http://pubs.usgs.gov/of/2005/1001/htmldocs/datacatalog.htm</onlink>
+				<onlink>http://coastalmap.marine.usgs.gov/GISdata/basemaps/boundaries/state_bounds/state_bounds.zip</onlink>
+				<lworkcit>
+					<citeinfo>
+						<origin>L.J. Poppe</origin>
+						<origin>S.J. Williams</origin>
+						<origin>V.F. Paskevich</origin>
+						<pubdate>2005</pubdate>
+						<title>U.S. Geological Survey East-Coast Sediment Analysis: Procedures, Database, and GIS Data</title>
+						<serinfo>
+							<sername>Open-File Report</sername>
+							<issue>2005-1001</issue>
+						</serinfo>
+						<pubinfo>
+							<pubplace>Woods Hole Science Center, Woods Hole, MA</pubplace>
+							<publish>U.S. Geological Survey, Coastal and Marine Geology Program</publish>
+						</pubinfo>
+						<othercit>Publication and data are released via DVD-ROM media. This digital publication may also be available via the web at pubs.usgs.gov</othercit>
+						<onlink>http://pubs.usgs.gov/of/2005/1001/</onlink>
+					</citeinfo>
+				</lworkcit>
+				<ftname Sync="TRUE">state_bounds</ftname></citeinfo>
+		</citation>
+		<descript>
+			<abstract>This ArcView shapefile represents the internal boundaries of the United States and the political boundaries between the US, Canada and Mexico.</abstract>
+			<purpose>This data layer includes the internal boundaries for the United States and the political boundaries of the US, Canada and Mexico.  The state boundaries are drawn to the US coastline and does not include any coastline or islands.  This data layer may be used with the high resolution NOS80K coastline (allus80k.shp) which does not include any internal boundaries.</purpose>
+			<supplinf>This dataset was created to be used with the NOS80K coastline (allus80k.shp) to provide state bounds without redrawing the coastline.  In creating the data layer, some issues of the NOS80K coastline became apparent.  One example, is the US/Mexico boundary.  The NOS80K coastline closes and draws a straight line well below the Texas border.  The same type of problem can be seen around the US/Canada boundary of the Great Lakes.  The state_bounds.shp will draw the political boundaries while the allus80k.shp file will display the US beyond the political boundaries.  If this is unacceptable to the user, they should consider masking the annexed US possession.</supplinf>
+			<langdata Sync="TRUE">en</langdata></descript>
+		<timeperd>
+			<timeinfo>
+				<sngdate>
+					<caldate>20021004</caldate>
+				</sngdate>
+			</timeinfo>
+			<current>publication date</current>
+		</timeperd>
+		<status>
+			<progress>Complete</progress>
+			<update>None planned</update>
+		</status>
+		<spdom>
+			<bounding>
+				<westbc>
+-124.211606</westbc>
+				<eastbc>
+-67.158958</eastbc>
+				<northbc>
+49.384359</northbc>
+				<southbc>
+25.837377</southbc>
+			</bounding>
+			<lboundng><leftbc Sync="TRUE">-124.211606</leftbc><rightbc Sync="TRUE">-67.158958</rightbc><bottombc Sync="TRUE">25.837377</bottombc><topbc Sync="TRUE">49.384359</topbc></lboundng></spdom>
+		<keywords>
+			<theme>
+				<themekt>General</themekt>
+				<themekey>U. S. Geological Survey</themekey>
+				<themekey>USGS</themekey>
+				<themekey>Coastal and Marine Geology Program</themekey>
+				<themekey>CMGP</themekey>
+				<themekey>Woods Hole Field Center</themekey>
+				<themekey>Geographic Information System</themekey>
+				<themekey>GIS</themekey>
+				<themekey>ArcView shapefile</themekey>
+				<themekey>polyline</themekey>
+				<themekey>state bounds</themekey>
+				<themekey>us and Canada boundary</themekey>
+				<themekey>us and Mexico boundary</themekey>
+				<themekey>internal boundaries</themekey>
+			</theme>
+			<place>
+				<placekt>General</placekt>
+				<placekey>North America</placekey>
+				<placekey>United States</placekey>
+				<placekey>US</placekey>
+				<placekey>contiguous 48 states</placekey>
+			</place>
+		</keywords>
+		<accconst>None</accconst>
+		<useconst>None</useconst>
+		<ptcontac>
+			<cntinfo>
+				<cntperp>
+					<cntper>Valerie Paskevich</cntper>
+					<cntorg>U. S. Geological Survey</cntorg>
+				</cntperp>
+				<cntpos>Computer Specialist</cntpos>
+				<cntaddr>
+					<addrtype>mailing and physical address</addrtype>
+					<address>384 Woods Hole Road</address>
+					<city>Woods Hole</city>
+					<state>MA</state>
+					<postal>02543-1598</postal>
+					<country>USA</country>
+				</cntaddr>
+				<cntvoice>(508) 548-8700 x2281</cntvoice>
+				<cntfax>(508) 457-2310</cntfax>
+				<cntemail>vpaskevich@usgs.gov</cntemail>
+			</cntinfo>
+		</ptcontac>
+		<browse>
+			<browsen>http://pubs.usgs.gov/of/2005/1001/data/basemaps/boundaries/state_bounds/state_bounds.gif</browsen>
+			<browsed>Image showing extent and coverage of the state_bounds shapefile with large US lakes.</browsed>
+			<browset>GIF</browset>
+		</browse>
+		<browse>
+			<browsen>http://coastalmap.marine.usgs.gov/GISdata/basemaps/boundaries/state_bounds/state_bounds.gif</browsen>
+			<browsed>Image showing extent and coverage of the state_bounds shapefile with large US lakes.</browsed>
+			<browset>GIF</browset>
+		</browse>
+		<datacred>The true origin of this dataset is compiled from ESRI's 50 individual state 'trct' files.  Please view the Source Information for more details</datacred>
+		<native>Microsoft Windows XP Version 5.1 (Build 2600) Service Pack 2; ESRI ArcCatalog 9.0.0.535</native>
+		<natvform Sync="TRUE">Shapefile</natvform></idinfo>
+	<dataqual>
+		<logic>No additional checks for topological consistency were performed on this data set.</logic>
+		<complete>This data set contains the internal boundaries for the continental US and the US/Canada and US/Mexico political boundaries.</complete>
+		<lineage>
+			<srcinfo>
+				<srccite>
+					<citeinfo>
+						<origin>Valerie Paskevich</origin>
+						<pubdate>Unpublished Material</pubdate>
+						<title>USA: United States basemap data layer</title>
+						<edition>1.0</edition>
+						<geoform>vector digital data</geoform>
+					</citeinfo>
+				</srccite>
+				<typesrc>disc</typesrc>
+				<srccitea>usa.shp</srccitea>
+				<srccontr>The compiled usa.shp file was used as the source for this new data layer.</srccontr>
+			</srcinfo>
+			<procstep>
+				<procdesc>The usa.shp file was copied and edited to remove the coastline and islands.  Because the file contained shapes for the individual states, duplicate common boundaries were numerous.  The file was edited further to remove these duplicate shapes and remove the original table information.  A final clean-up was done to combine (UNION) line segments and reduce the number of individual shapes.</procdesc>
+				<srcused>usa.shp</srcused>
+				<procdate>20021003</procdate>
+				<proctime>1440</proctime>
+				<srcprod>state_bounds.shp</srcprod>
+				<proccont>
+					<cntinfo>
+						<cntperp>
+							<cntper>Valerie Paskevich</cntper>
+							<cntorg>U.S. Geological Survey</cntorg>
+						</cntperp>
+						<cntpos>Computer Specialist</cntpos>
+						<cntaddr>
+							<addrtype>mailing and physical address</addrtype>
+							<address>384 Woods Hole Road</address>
+							<city>Woods Hole</city>
+							<state>MA</state>
+							<postal>02543-1598</postal>
+							<country>USA</country>
+						</cntaddr>
+						<cntvoice>(508) 548-8700 x2281</cntvoice>
+						<cntfax>(508) 457-2310</cntfax>
+						<cntemail>vpaskevich@usgs.gov</cntemail>
+					</cntinfo>
+				</proccont>
+			</procstep>
+		</lineage>
+	</dataqual>
+	<spdoinfo>
+		<direct>Vector</direct>
+		<ptvctinf>
+			<sdtsterm Name="state_bounds">
+				<sdtstype>String</sdtstype>
+				<ptvctcnt>19</ptvctcnt>
+			</sdtsterm>
+			<esriterm Name="state_bounds"><efeatyp Sync="TRUE">Simple</efeatyp><efeageom Sync="TRUE">Polyline</efeageom><esritopo Sync="TRUE">FALSE</esritopo><efeacnt Sync="TRUE">19</efeacnt><spindex Sync="TRUE">TRUE</spindex><linrefer Sync="TRUE">FALSE</linrefer></esriterm></ptvctinf>
+	</spdoinfo>
+	<spref>
+		<horizsys>
+			<geograph>
+				<latres>0.000001</latres>
+				<longres>0.000001</longres>
+				<geogunit>Decimal degrees</geogunit>
+			</geograph>
+			<geodetic>
+				<horizdn>North American Datum of 1983</horizdn>
+				<ellips>Geodetic Reference System 80</ellips>
+				<semiaxis>6378137.000000</semiaxis>
+				<denflat>298.257222</denflat>
+			</geodetic>
+			<cordsysn><geogcsn Sync="TRUE">GCS_North_American_1983</geogcsn></cordsysn></horizsys>
+	</spref>
+	<eainfo>
+		<detailed Name="state_bounds">
+			<enttyp>
+				<enttypl>
+state_bounds.dbf</enttypl>
+				<enttypd>Shapefile Attribute Table</enttypd>
+				<enttypds>ESRI</enttypds>
+				<enttypt Sync="TRUE">Feature Class</enttypt><enttypc Sync="TRUE">19</enttypc></enttyp>
+			<attr>
+				<attrlabl>FID</attrlabl>
+				<attrdef>Internal feature number.</attrdef>
+				<attrdefs>ESRI</attrdefs>
+				<attrdomv>
+					<udom>Sequential unique whole numbers that are automatically generated.</udom>
+				</attrdomv>
+			</attr>
+			<attr>
+				<attrlabl>Shape</attrlabl>
+				<attrdef>Feature geometry.</attrdef>
+				<attrdefs>ESRI</attrdefs>
+				<attrdomv>
+					<udom>Coordinates defining the features.</udom>
+				</attrdomv>
+			</attr>
+			<attr>
+				<attrlabl>ID</attrlabl>
+				<attrdef>Assigned feature id and has no applicable relevenace to the data.</attrdef>
+				<attrdefs>User Defined</attrdefs>
+				<attrtype Sync="TRUE">Number</attrtype><attwidth Sync="TRUE">11</attwidth></attr>
+			<attr>
+				<attrlabl>LENGTH</attrlabl>
+				<attrdef>Length of line in native units</attrdef>
+				<attrdefs>User Defined</attrdefs>
+				<attrtype Sync="TRUE">Number</attrtype><attwidth Sync="TRUE">16</attwidth><atnumdec Sync="TRUE">3</atnumdec></attr>
+		</detailed>
+		<overview>
+		</overview>
+	</eainfo>
+	<distinfo>
+		<distrib>
+			<cntinfo>
+				<cntorgp>
+					<cntorg>U.S. Geological Survey</cntorg>
+				</cntorgp>
+				<cntaddr>
+					<addrtype>mailing and physical address</addrtype>
+					<address>384 Woods Hole Road</address>
+					<city>Woods Hole</city>
+					<state>MA</state>
+					<postal>02543-1598</postal>
+					<country>USA</country>
+				</cntaddr>
+				<cntvoice>(508) 548-8700</cntvoice>
+				<cntfax>(508) 457-2310</cntfax>
+			</cntinfo>
+		</distrib>
+		<resdesc>Downloadable Data</resdesc>
+		<distliab>Although this derived data set and it's lineage dataset have been used by the  USGS, no warranty, expressed or implied, is made by the USGS as to the accuracy of the data and/or related materials. The act of distribution shall not constitute any such warranty, and no responsibility is assumed by the USGS in the use of these data or related materials.</distliab>
+		<stdorder>
+			<digform>
+				<digtinfo>
+					<formname>Shapefile</formname>
+					<formvern>ArcView 3.2</formvern>
+					<formspec>ESRI shapefile</formspec>
+					<formcont>The SHP file contains the geospatial data. The SHX file contains the index of the geospatial data. The DBF file contains the attribute data in dBASE format. The PRJ file contains the coordinate system information (optional). The AVL file contains the legend information (optional). The SBN and SBX files contain the spatial index of the geospatial data (optional). The XML file contains the metadata describing the data set &lt;data set name&gt;.shp.xml (optional).</formcont>
+					<filedec>zip</filedec>
+					<transize>2.623</transize>
+					<dssize Sync="TRUE">2.623</dssize></digtinfo>
+				<digtopt>
+					<onlinopt>
+						<computer>
+							<networka>
+								<networkr>http://pubs.usgs.gov/of/2005/1001/data/basemaps/boundaries/state_bounds/state_bounds.zip</networkr>
+							</networka>
+						</computer>
+						<accinstr>Data are accessible via the World Wide Web (WWW).</accinstr>
+					</onlinopt>
+				</digtopt>
+			</digform>
+			<fees>none</fees>
+		</stdorder>
+		<techpreq>The base map overlay is available as an ArcView shapefile format. The user must have ESRI's ArcView 3.0 or greater software to read and process the data file. In lieu of ArcView, the user may utilize another GIS application package capable of importing the data.</techpreq>
+	</distinfo>
+	<metainfo>
+		<metd>20050512</metd>
+		<metc>
+			<cntinfo>
+				<cntperp>
+					<cntper>Valerie Paskevich</cntper>
+					<cntorg>U.S. Geological Survey</cntorg>
+				</cntperp>
+				<cntpos>Information Specialist, GIS Coordinator</cntpos>
+				<cntaddr>
+					<addrtype>mailing and physical address</addrtype>
+					<address>384 Woods Hole Road</address>
+					<city>Woods Hole</city>
+					<state>MA</state>
+					<postal>02543-1598</postal>
+					<country>USA</country>
+				</cntaddr>
+				<cntvoice>(508) 548-8700 x2281</cntvoice>
+				<cntfax>(508) 457-2310</cntfax>
+				<cntemail>vpaskevich@usgs.gov</cntemail>
+			</cntinfo>
+		</metc>
+		<metstdn>FGDC Content Standards for Digital Geospatial Metadata</metstdn>
+		<metstdv>FGDC-STD-001-1998</metstdv>
+		<mettc>local time</mettc>
+		<metac>None</metac>
+		<metuc>None</metuc>
+		<metextns>
+			<onlink>http://www.esri.com/metadata/esriprof80.html</onlink>
+			<metprof>ESRI Metadata Profile</metprof>
+		</metextns>
+		<langmeta Sync="TRUE">en</langmeta><metextns><onlink Sync="TRUE">http://www.esri.com/metadata/esriprof80.html</onlink><metprof Sync="TRUE">ESRI Metadata Profile</metprof></metextns></metainfo>
+	<dataIdInfo><envirDesc Sync="TRUE">Microsoft Windows XP Version 5.1 (Build 2600) Service Pack 2; ESRI ArcCatalog 9.0.0.535</envirDesc><dataLang><languageCode Sync="TRUE" value="en"></languageCode></dataLang><idCitation><resTitle Sync="TRUE">state_bounds</resTitle><presForm><PresFormCd Sync="TRUE" value="005"></PresFormCd></presForm></idCitation><spatRpType><SpatRepTypCd Sync="TRUE" value="001"></SpatRepTypCd></spatRpType><dataExt><geoEle><GeoBndBox esriExtentType="native"><westBL Sync="TRUE">-124.211606</westBL><eastBL Sync="TRUE">-67.158958</eastBL><northBL Sync="TRUE">49.384359</northBL><southBL Sync="TRUE">25.837377</southBL><exTypeCode Sync="TRUE">1</exTypeCode></GeoBndBox></geoEle></dataExt><geoBox esriExtentType="decdegrees"><westBL Sync="TRUE">-124.211606</westBL><eastBL Sync="TRUE">-67.158958</eastBL><northBL Sync="TRUE">49.384359</northBL><southBL Sync="TRUE">25.837377</southBL><exTypeCode Sync="TRUE">1</exTypeCode></geoBox></dataIdInfo><mdLang><languageCode Sync="TRUE" value="en"></languageCode></mdLang><mdStanName Sync="TRUE">ISO 19115 Geographic Information - Metadata</mdStanName><mdStanVer Sync="TRUE">DIS_ESRI1.0</mdStanVer><mdChar><CharSetCd Sync="TRUE" value="004"></CharSetCd></mdChar><mdHrLv><ScopeCd Sync="TRUE" value="005"></ScopeCd></mdHrLv><mdHrLvName Sync="TRUE">dataset</mdHrLvName><distInfo><distributor><distorTran><onLineSrc><orDesc Sync="TRUE">002</orDesc><linkage Sync="TRUE">file://\\VALPASDTXP\D$\my webs\texture\data\basemaps\boundaries\state_bounds\state_bounds.shp</linkage><protocol Sync="TRUE">Local Area Network</protocol></onLineSrc><transSize Sync="TRUE">2.623</transSize></distorTran><distorFormat><formatName Sync="TRUE">Shapefile</formatName></distorFormat></distributor></distInfo><refSysInfo><RefSystem><refSysID><identCode Sync="TRUE">GCS_North_American_1983</identCode></refSysID></RefSystem></refSysInfo><spatRepInfo><VectSpatRep><topLvl><TopoLevCd Sync="TRUE" value="001"></TopoLevCd></topLvl><geometObjs Name="state_bounds"><geoObjTyp><GeoObjTypCd Sync="TRUE" value="001"></GeoObjTypCd></geoObjTyp><geoObjCnt Sync="TRUE">19</geoObjCnt></geometObjs></VectSpatRep></spatRepInfo><Esri><SyncDate>20050823</SyncDate><SyncTime>14412600</SyncTime><ModDate>20050823</ModDate><ModTime>14412600</ModTime></Esri><mdDateSt Sync="TRUE">20050823</mdDateSt></metadata>

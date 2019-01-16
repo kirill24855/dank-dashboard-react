@@ -1,28 +1,36 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
+import Globe from "./components/Globe";
 
 class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
-    );
-  }
+
+	state = {
+		sticks: [
+			{
+				id: 1,
+				size: 654
+			}
+		],
+		rotationAngleLat: 0,
+		focusPoint: null
+	};
+
+	handleGlobeChange() {}
+
+	render() {
+		return (
+			<div style={{width:"100%", height:"100%", position:"absolute", top:"0", left:"0"}}>
+
+				<button onClick={()=>{this.setState({focusPoint: {lat: 10, lng: -170}})}}>focus</button>
+				<div style={{width:"100%", height:"100%", display:"inline-block"}}>
+					<Globe
+						focusPoint={this.state.focusPoint}
+						onChange={this.handleGlobeChange.bind(this)}
+					/>
+				</div>
+			</div>
+		);
+	}
 }
 
 export default App;
