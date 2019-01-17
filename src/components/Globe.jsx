@@ -2,15 +2,17 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import * as THREE from "three";
 import loadBorders from "../shpLoader";
-import GlobeStyle from "./Globe.css";
+import "./Globe.css";
 
 /*
  * Done with globe and country borders
  * TODO Now, looking for a higher-res globe texture, maybe
  * Also need to get data for all states of the US, and maybe other large countries like Russia, Canada, etc
  * TODO Gotta configure some type of networking and listening for data from a server, so as to update the sticks in real time
+ * 		actually no, bad idea. the super component should do that, and just give the globe what it needs. eNcApSuLaTiOn
  * TODO Add labels to countries and sticks?
  * TODO Make sticks' length represent a number (people or some such)
+ * 		already kinda happening, the size/length is decided by the super so its up to that component
  * TODO Change appearance of sticks to signify important notifications (errors, closed deals, etc)
  *
  * Write functionality for the FOCUS POINT, to rotate the globe to given coordinates in response to an event (errors, closed deals, etc)
@@ -21,6 +23,7 @@ import GlobeStyle from "./Globe.css";
 let defaultMarkerColor = 0x9ff9ff;
 let defaultBorderColor = 0x4cc4ff;
 let defaultStickColor = 0x4cc4ff;
+let errorStickColor = 0xff6e59;
 
 export default class Globe extends Component {
 
@@ -34,9 +37,10 @@ export default class Globe extends Component {
 		zoom: PropTypes.number,
 		rotationRate: PropTypes.number,
 
-		stickWidth: PropTypes.number,
-		stickColor: PropTypes.string,
 		sticks: PropTypes.array,
+		stickWidth: PropTypes.number,
+		defaultStickColor: PropTypes.string,
+		errorStickColor: PropTypes.string,
 
 		focusPoint: PropTypes.object,
 		animationDuration: PropTypes.number,
@@ -48,7 +52,8 @@ export default class Globe extends Component {
 	state = {
 		markerMaterial: new THREE.LineBasicMaterial({color: this.props.markerColor || defaultMarkerColor}),
 		borderMaterial: new THREE.LineBasicMaterial({color: this.props.borderColor || defaultBorderColor}),
-		stickMaterial: new THREE.MeshPhongMaterial({color: this.props.stickColor || defaultStickColor}),
+		defaultStickMaterial: new THREE.MeshPhongMaterial({color: this.props.defaultStickColor || defaultStickColor}),
+		errorStickMaterial: new THREE.MeshPhongMaterial({color: this.props.errorStickColor || errorStickColor}),
 
 		stickWidth: this.props.stickWidth || 0.005,
 
@@ -150,9 +155,12 @@ export default class Globe extends Component {
 		return hSquared/*/bSquared*/ < threshold;
 	}
 
-	addStick(lat, lng, length) {
+	addStick(lat, lng, length, type) {
+		let material = this.state.defaultStickMaterial;
+		if (type === "error") material = this.state.errorStickMaterial;
+
 		let geometry = new THREE.BoxGeometry(this.state.stickWidth, this.state.stickWidth, length, 1, 1, 1);
-		let stickMesh = new THREE.Mesh(geometry, this.state.stickMaterial);
+		let stickMesh = new THREE.Mesh(geometry, material);
 		let pivot = new THREE.Object3D();
 		pivot.add(stickMesh);
 		stickMesh.position.set(0, 0, 1 + length/2);
@@ -170,7 +178,7 @@ export default class Globe extends Component {
 
 		for (let i in sticks) {
 			let stick = sticks[i];
-			this.addStick(stick.lat, stick.lng, stick.size);
+			this.addStick(stick.lat, stick.lng, stick.size, stick.type);
 		}
 	}
 

@@ -14,6 +14,7 @@ class App extends Component {
 	onGlobeClick(coords) {
 		this.setState({sticks: [...this.state.sticks, {
 				id: 2,
+				type: "error",
 				size: 0.2,
 				lat: coords.lat,
 				lng: coords.lng,
