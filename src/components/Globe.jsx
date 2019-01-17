@@ -15,7 +15,7 @@ import GlobeStyle from "./Globe.css";
  *
  * Write functionality for the FOCUS POINT, to rotate the globe to given coordinates in response to an event (errors, closed deals, etc)
  *
- * TODO return the (lat, lng) of a click to the parent, maybe along with the country name
+ * Return the (lat, lng) of a click to the parent, maybe along with the country name
  */
 
 let defaultMarkerColor = 0x9ff9ff;
@@ -42,12 +42,13 @@ export default class Globe extends Component {
 		animationDuration: PropTypes.number,
 
 		onChange: PropTypes.func.isRequired,
+		onGlobeClick: PropTypes.func.isRequired,
 	};
 
 	state = {
 		markerMaterial: new THREE.LineBasicMaterial({color: this.props.markerColor || defaultMarkerColor}),
 		borderMaterial: new THREE.LineBasicMaterial({color: this.props.borderColor || defaultBorderColor}),
-		stickMaterial: new THREE.MeshNormalMaterial({color: this.props.stickColor || defaultStickColor}),
+		stickMaterial: new THREE.MeshPhongMaterial({color: this.props.stickColor || defaultStickColor}),
 
 		stickWidth: this.props.stickWidth || 0.005,
 
@@ -149,26 +150,28 @@ export default class Globe extends Component {
 		return hSquared/*/bSquared*/ < threshold;
 	}
 
-	// TODO refactor this method to listen to the super object for adding sticks, rather than giving it the power to do it by itself
 	addStick(lat, lng, length) {
 		let geometry = new THREE.BoxGeometry(this.state.stickWidth, this.state.stickWidth, length, 1, 1, 1);
 		let stickMesh = new THREE.Mesh(geometry, this.state.stickMaterial);
 		let pivot = new THREE.Object3D();
 		pivot.add(stickMesh);
-		stickMesh.userData.pivot = pivot;
 		stickMesh.position.set(0, 0, 1 + length/2);
 
-		this.rotateObjAroundOrigin(stickMesh.userData.pivot, lat, lng);
+		this.rotateObjAroundOrigin(pivot, lat, lng);
 
-		this.gSticks.push({
-			lat: lat,
-			lng: lng,
-			length: length,
-			mesh: stickMesh
-		});
-
-		this.gScene.add(pivot);
+		this.gSticks.add(pivot);
 		this.draw();
+	}
+
+	addSticks(sticks) {
+		this.gScene.remove(this.gSticks);
+		this.gSticks = new THREE.Group();
+		this.gScene.add(this.gSticks);
+
+		for (let i in sticks) {
+			let stick = sticks[i];
+			this.addStick(stick.lat, stick.lng, stick.size);
+		}
 	}
 
 	rotateObjAroundOrigin(pivot, lat, lng) {
@@ -221,7 +224,7 @@ export default class Globe extends Component {
 		let height = this.mount.clientHeight;
 
 		this.gScene = new THREE.Scene();
-		this.gCamera = new THREE.PerspectiveCamera(this.props.fovY || 75, width/height, 0.9, 10); // set the far value at 1.55 to not render the back of the globe
+		this.gCamera = new THREE.PerspectiveCamera(this.props.fovY || 75, width/height, 0.1, 10); // set the far value at 1.55 to not render the back of the globe
 		this.gCamera.fovX = 2 * Math.atan(Math.tan(this.gCamera.fov / 2 * Math.PI / 180) * this.gCamera.aspect) * 180 / Math.PI;
 
 		this.gCamera.distance = this.props.zoom + 1 || 2;
@@ -245,11 +248,7 @@ export default class Globe extends Component {
 		this.gRenderer.domElement.addEventListener("click", e => {
 			let coords = Globe.screenToGlobeCoords(e.offsetX/width, (height-e.offsetY)/height, this.gCamera, this.gScene.userData.earth);
 			if (coords == null) return;
-			this.addStick(
-				coords.lat,
-				coords.lng,
-				0.1
-			);
+			this.props.onGlobeClick(coords);
 		});
 
 		this.gRenderer.domElement.addEventListener("mousedown", () => this.isDragging = true);
@@ -273,7 +272,10 @@ export default class Globe extends Component {
 		// not sure if this is anti-pattern TODO figure out if this is anti-pattern
 		document.addEventListener("mouseup", () => this.isDragging = false);
 
-		this.gSticks = [];
+		this.gSticks = new THREE.Group();
+		this.gScene.add(this.gSticks);
+
+		this.gScene.add(new THREE.AmbientLight(0xffffff, 1));
 
 		this.gAnimation = {
 			duration: this.props.animationDuration || 1000,
@@ -316,7 +318,8 @@ export default class Globe extends Component {
 
 	shouldComponentUpdate(nextProps, nextState) {
 		this.draw();
-		return (this.props.focusPoint !== nextProps.focusPoint && nextProps.focusPoint != null);
+		return (this.props.focusPoint !== nextProps.focusPoint && nextProps.focusPoint != null)
+			|| (this.props.sticks !== nextProps.sticks);
 	}
 
 	componentDidUpdate(prevProps, prevState, snapshot) {
@@ -328,13 +331,17 @@ export default class Globe extends Component {
 			let startLng = this.gCamera.rot.lng;
 			let stdDist = this.props.focusPoint.lng - startLng;
 
-			// black magic, do not disturb
+			// just works, no reason to try to figure it out
 			if (Math.abs(stdDist) > 180) startLng -= 360;
 			stdDist = this.props.focusPoint.lng - startLng;
 			if (Math.abs(stdDist) > 180) startLng += 720;
 
 			this.gAnimation.startLoc = {lat: startLat, lng: startLng};
 			requestAnimationFrame(this.animate);
+		}
+
+		if (this.props.sticks !== prevProps.sticks) {
+			this.addSticks(this.props.sticks);
 		}
 	}
 
