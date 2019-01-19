@@ -25,6 +25,8 @@ let defaultBorderColor = 0x4cc4ff;
 let defaultStickColor = 0x4cc4ff;
 let errorStickColor = 0xff6e59;
 
+let defaultGlowColor = defaultMarkerColor;
+
 export default class Globe extends Component {
 
 	static propTypes = {
@@ -32,6 +34,8 @@ export default class Globe extends Component {
 		borderColor: PropTypes.number,
 		markerColor: PropTypes.number,
 		//countryFillColor: PropTypes.string,
+
+		glowColor: PropTypes.number,
 
 		fovY: PropTypes.number,
 		zoom: PropTypes.number,
@@ -199,15 +203,18 @@ export default class Globe extends Component {
 	}
 
 	rotateCamera() {
-		let lng = this.gCamera.rot.lng;
-		let lat = this.gCamera.rot.lat;
+		let lng = this.gCamera.rot.lng * Math.PI / 180;
+		let lat = this.gCamera.rot.lat * Math.PI / 180;
 
-		this.rotateObjAroundOrigin(this.gCamera.userData.pivot, lat, lng);
+		this.gCamera.position.x = Math.sin(lng) * Math.cos(lat) * this.gCamera.distance;
+		this.gCamera.position.y = Math.sin(lat) * this.gCamera.distance;
+		this.gCamera.position.z = Math.cos(lng) * Math.cos(lat) * this.gCamera.distance;
+		this.gCamera.lookAt(this.state.origin);
 
-		/*camera.position.x = Math.sin(lng) * Math.cos(lat) * camera.distance;
-		camera.position.y = Math.sin(lat) * camera.distance;
-		camera.position.z = Math.cos(lng) * Math.cos(lat) * camera.distance;
-		camera.lookAt(this.state.origin);*/
+		//this.rotateObjAroundOrigin(this.gCamera.userData.pivot, lat, lng); // this is faster, but it doesn't update camera.position, which is necessary for the glow
+
+
+		this.gScene.userData.earth.userData.glow.material.uniforms.viewVector.value = this.gCamera.position;
 	}
 
 	static screenToGlobeCoords(mouseX, mouseY, camera, earth) {
@@ -312,7 +319,47 @@ export default class Globe extends Component {
 			mesh.rotateY(3*Math.PI/2);
 			earth.add(mesh);
 
+			// earth glow
+			let glowMaterial = new THREE.ShaderMaterial({
+				uniforms: {
+					"c": {type: "f", value: 0.4},
+					"p": {type: "f", value: 6},
+					glowColor: {type: "c", value: new THREE.Color(this.props.glowColor || defaultGlowColor)},
+					viewVector: {type: "v3", value: this.gCamera.position}
+				},
+				vertexShader: `
+					uniform vec3 viewVector;
+					uniform float c;
+					uniform float p;
+					varying float intensity;
+					void main() 
+					{
+						vec3 vNormal = normalize( normalMatrix * normal );
+						vec3 vNormel = normalize( normalMatrix * viewVector );
+						intensity = pow( c - dot(vNormal, vNormel), p );
+						
+						gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+					}
+				`,
+				fragmentShader: `
+					uniform vec3 glowColor;
+					varying float intensity;
+					void main() 
+					{
+						vec3 glow = glowColor * intensity;
+						gl_FragColor = vec4( glow, 1.0 );
+					}
+				`,
+				side: THREE.BackSide,
+				blending: THREE.AdditiveBlending,
+				transparent: true,
+			});
+			let earthGlow = new THREE.Mesh(geometry, glowMaterial);
+			earthGlow.scale.multiplyScalar(1.55);
+			earth.add(earthGlow);
+
 			earth.userData.object = mesh;
+			earth.userData.glow = earthGlow;
 
 			//this.draw();
 		});
@@ -323,7 +370,7 @@ export default class Globe extends Component {
 
 		this.addMarkersToScene(2, 12, earth);
 
-		this.gScene.userData.earth = earth.userData.object;
+		this.gScene.userData.earth = earth;
 
 		this.mount.appendChild(this.gRenderer.domElement);
 	}

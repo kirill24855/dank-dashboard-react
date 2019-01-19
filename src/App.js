@@ -56,11 +56,11 @@ class App extends Component {
 	}
 
 	setupTestEnvironment() {
-		let sticks = App.randomizeSticks([], 20, 0);
+		let sticks = App.randomizeSticks([], 100, 0);
 		this.setState({sticks});
 
 		setInterval(() => {
-			let sticks = App.randomizeSticks(this.state.sticks, 20, 10);
+			let sticks = App.randomizeSticks(this.state.sticks, 50, 10);
 			this.setState({sticks});
 		}, 1000);
 	}
