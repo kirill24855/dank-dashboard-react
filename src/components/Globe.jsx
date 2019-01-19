@@ -35,7 +35,8 @@ export default class Globe extends Component {
 
 		fovY: PropTypes.number,
 		zoom: PropTypes.number,
-		rotationRate: PropTypes.number,
+		mouseRotationSensitivity: PropTypes.number,
+		ambientRotationRate: PropTypes.number,
 
 		sticks: PropTypes.array,
 		stickWidth: PropTypes.number,
@@ -62,7 +63,7 @@ export default class Globe extends Component {
 		zAxis: new THREE.Vector3(0, 0, 1),
 		origin: new THREE.Vector3(0, 0, 0),
 
-		animating: false,
+		focusing: false,
 	};
 
 	constructor(props) {
@@ -168,7 +169,6 @@ export default class Globe extends Component {
 		this.rotateObjAroundOrigin(pivot, lat, lng);
 
 		this.gSticks.add(pivot);
-		this.draw();
 	}
 
 	addSticks(sticks) {
@@ -178,8 +178,11 @@ export default class Globe extends Component {
 
 		for (let i in sticks) {
 			let stick = sticks[i];
+
 			this.addStick(stick.lat, stick.lng, stick.size, stick.type);
 		}
+
+		//this.draw();
 	}
 
 	rotateObjAroundOrigin(pivot, lat, lng) {
@@ -195,11 +198,11 @@ export default class Globe extends Component {
 		object.rotation.setFromRotationMatrix(object.matrix);
 	}
 
-	rotateCamera(camera) {
-		let lng = camera.rot.lng;
-		let lat = camera.rot.lat;
+	rotateCamera() {
+		let lng = this.gCamera.rot.lng;
+		let lat = this.gCamera.rot.lat;
 
-		this.rotateObjAroundOrigin(camera.userData.pivot, lat, lng);
+		this.rotateObjAroundOrigin(this.gCamera.userData.pivot, lat, lng);
 
 		/*camera.position.x = Math.sin(lng) * Math.cos(lat) * camera.distance;
 		camera.position.y = Math.sin(lat) * camera.distance;
@@ -247,7 +250,8 @@ export default class Globe extends Component {
 		this.gRenderer.setSize(width, height);
 		this.gRenderer.setClearColor(this.props.backgroundColor || 0x000000, 1);
 
-		this.rotationRate = this.props.rotationRate || 0.1;
+		this.mouseRotationSensitivity = this.props.mouseRotationSensitivity || 0.1;
+		this.ambientRotationRate = this.props.ambientRotationRate || 1;
 
 		// my own orbitControls, without the problem of unexposed rotate methods
 		this.isDragging = false;
@@ -256,22 +260,25 @@ export default class Globe extends Component {
 		this.gRenderer.domElement.addEventListener("click", e => {
 			let coords = Globe.screenToGlobeCoords(e.offsetX/width, (height-e.offsetY)/height, this.gCamera, this.gScene.userData.earth);
 			if (coords == null) return;
+			if (this.mouseCoords.x !== e.offsetX || this.mouseCoords.y !== e.offsetY) return;
 			this.props.onGlobeClick(coords);
 		});
-
-		this.gRenderer.domElement.addEventListener("mousedown", () => this.isDragging = true);
+		this.gRenderer.domElement.addEventListener("mousedown", e => {
+			this.isDragging = true;
+			this.mouseCoords = {x: e.offsetX, y: e.offsetY};
+		});
 		this.gRenderer.domElement.addEventListener("mousemove", e => {
 			if (this.isDragging) {
-				this.gCamera.rot.lng -= (e.offsetX-this.dragPrev.x)*this.rotationRate;
-				this.gCamera.rot.lat += (e.offsetY-this.dragPrev.y)*this.rotationRate;
+				this.gCamera.rot.lng -= (e.offsetX-this.dragPrev.x)*this.mouseRotationSensitivity;
+				this.gCamera.rot.lat += (e.offsetY-this.dragPrev.y)*this.mouseRotationSensitivity;
 
 				if (this.gCamera.rot.lat > 90) this.gCamera.rot.lat = 90;
 				if (this.gCamera.rot.lat < -90) this.gCamera.rot.lat = -90;
 				if (this.gCamera.rot.lng > 180) this.gCamera.rot.lng -= 360;
 				if (this.gCamera.rot.lng < -180) this.gCamera.rot.lng += 360;
 
-				this.rotateCamera(this.gCamera);
-				this.draw();
+				//this.rotateCamera(); // uncomment if not animating by default
+				//this.draw();
 			}
 
 			this.dragPrev = {x: e.offsetX, y: e.offsetY};
@@ -306,6 +313,8 @@ export default class Globe extends Component {
 			earth.add(mesh);
 
 			earth.userData.object = mesh;
+
+			//this.draw();
 		});
 
 		// load borders
@@ -321,18 +330,18 @@ export default class Globe extends Component {
 
 	async componentDidMount() {
 		await this.init();
-		this.draw();
+		this.animate();
 	}
 
-	shouldComponentUpdate(nextProps, nextState) {
-		this.draw();
-		return (this.props.focusPoint !== nextProps.focusPoint && nextProps.focusPoint != null)
-			|| (this.props.sticks !== nextProps.sticks);
-	}
+	/*shouldComponentUpdate(nextProps, nextState) {
+		/!*return (this.props.focusPoint !== nextProps.focusPoint && nextProps.focusPoint != null)
+			|| (this.props.sticks !== nextProps.sticks);*!/
+		return true;
+	}*/
 
 	componentDidUpdate(prevProps, prevState, snapshot) {
 		if (this.props.focusPoint !== prevProps.focusPoint && this.props.focusPoint != null) {
-			this.setState({animating: true});
+			this.setState({focusing: true});
 			this.gAnimation.startTime = Date.now();
 
 			let startLat = this.gCamera.rot.lat;
@@ -345,7 +354,7 @@ export default class Globe extends Component {
 			if (Math.abs(stdDist) > 180) startLng += 720;
 
 			this.gAnimation.startLoc = {lat: startLat, lng: startLng};
-			requestAnimationFrame(this.animate);
+			//requestAnimationFrame(this.animate);
 		}
 
 		if (this.props.sticks !== prevProps.sticks) {
@@ -353,26 +362,41 @@ export default class Globe extends Component {
 		}
 	}
 
-	animate() {
+	animate(timestamp) {
+		if (!timestamp) {
+			requestAnimationFrame(this.animate);
+			return;
+		}
+
+		if (this.state.focusing) this.focus();
+		else {
+			if (!this.gCamera.userData.lastRenderTime) this.gCamera.userData.lastRenderTime = timestamp;
+			this.gCamera.rot.lng += this.ambientRotationRate*(timestamp - this.gCamera.userData.lastRenderTime)/1000;
+			this.rotateCamera();
+		}
+
+		this.draw();
+		this.gCamera.userData.lastRenderTime = timestamp;
+		requestAnimationFrame(this.animate);
+	}
+
+	focus() {
 		let curTime = Date.now();
 		this.gAnimation.curProgress = curTime - this.gAnimation.startTime;
 		if (this.gAnimation.curProgress > this.gAnimation.duration) {
-			this.setState({animating: false});
+			this.setState({focusing: false});
 			this.gAnimation.curProgress = this.gAnimation.duration;
 		}
-		if (this.state.animating) requestAnimationFrame(this.animate);
 
 		let progress = this.gAnimation.curProgress / this.gAnimation.duration;
 		this.gCamera.rot.lat = (this.props.focusPoint.lat - this.gAnimation.startLoc.lat) * Globe.d(progress) + this.gAnimation.startLoc.lat;
 		this.gCamera.rot.lng = (this.props.focusPoint.lng - this.gAnimation.startLoc.lng) * Globe.d(progress) + this.gAnimation.startLoc.lng;
 
-		this.rotateCamera(this.gCamera);
-
-		this.draw();
+		this.rotateCamera();
 	}
 
 	// TODO find a better name - mathematical functions usually have 1-letter names, but that's discouraged in JS
-	static d(t) {return -2*t*t*(t-1.5);}
+	static d(t) {return -2*t*t*(t-1.5);} // cubic relation, maybe experiment with different functions here?
 
 	draw() {
 		this.gRenderer.render(this.gScene, this.gCamera);

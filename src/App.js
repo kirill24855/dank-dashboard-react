@@ -12,13 +12,61 @@ class App extends Component {
 	handleGlobeChange() {}
 
 	onGlobeClick(coords) {
-		this.setState({sticks: [...this.state.sticks, {
+		/*this.setState({sticks: [...this.state.sticks, { // add stick at click location
 				id: 2,
 				type: "error",
 				size: 0.2,
 				lat: coords.lat,
 				lng: coords.lng,
-		}]});
+		}]});*/
+	}
+
+	static shuffle(b) {
+		let a = b.slice(0);
+		for (let i = a.length-1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i+1));
+			if (i === j) continue;
+			[a[i], a[j]] = [a[j], a[i]];
+		}
+		return a;
+	}
+
+	static randomizeSticks(sticks, total, count) {
+		sticks = App.shuffle(sticks).slice(0, count);
+		sticks = [...sticks, ...App.generateSticks(total-count)];
+
+		return sticks;
+	}
+
+	static generateStick() {
+		return {
+			type: Math.random() < 0.2 ? "error" : "normal",
+			size: Math.random() * 0.3,
+			lat: Math.random() * 180 - 90,
+			lng: Math.random() * 360 - 180,
+		};
+	}
+
+	static generateSticks(count) {
+		const sticks = [];
+		for (let i = 0; i < count; i++) {
+			sticks.push(App.generateStick());
+		}
+		return sticks;
+	}
+
+	setupTestEnvironment() {
+		let sticks = App.randomizeSticks([], 20, 0);
+		this.setState({sticks});
+
+		setInterval(() => {
+			let sticks = App.randomizeSticks(this.state.sticks, 20, 10);
+			this.setState({sticks});
+		}, 1000);
+	}
+
+	componentDidMount() {
+		this.setupTestEnvironment();
 	}
 
 	render() {
