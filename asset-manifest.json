@@ -1,13 +1,13 @@
 {
   "main.css": "/dank-dashboard-react/static/css/main.577574a5.chunk.css",
-  "main.js": "/dank-dashboard-react/static/js/main.9548ee70.chunk.js",
-  "main.js.map": "/dank-dashboard-react/static/js/main.9548ee70.chunk.js.map",
-  "static/js/1.daed8785.chunk.js": "/dank-dashboard-react/static/js/1.daed8785.chunk.js",
-  "static/js/1.daed8785.chunk.js.map": "/dank-dashboard-react/static/js/1.daed8785.chunk.js.map",
+  "main.js": "/dank-dashboard-react/static/js/main.b9bd2695.chunk.js",
+  "main.js.map": "/dank-dashboard-react/static/js/main.b9bd2695.chunk.js.map",
+  "static/js/1.3a8f3960.chunk.js": "/dank-dashboard-react/static/js/1.3a8f3960.chunk.js",
+  "static/js/1.3a8f3960.chunk.js.map": "/dank-dashboard-react/static/js/1.3a8f3960.chunk.js.map",
   "runtime~main.js": "/dank-dashboard-react/static/js/runtime~main.fccdf1f5.js",
   "runtime~main.js.map": "/dank-dashboard-react/static/js/runtime~main.fccdf1f5.js.map",
   "static/css/main.577574a5.chunk.css.map": "/dank-dashboard-react/static/css/main.577574a5.chunk.css.map",
   "index.html": "/dank-dashboard-react/index.html",
-  "precache-manifest.69242ca3114fb6222958be1c7b08d209.js": "/dank-dashboard-react/precache-manifest.69242ca3114fb6222958be1c7b08d209.js",
+  "precache-manifest.d2b3c4a7c0efc75cdd8d63e974660dc7.js": "/dank-dashboard-react/precache-manifest.d2b3c4a7c0efc75cdd8d63e974660dc7.js",
   "service-worker.js": "/dank-dashboard-react/service-worker.js"
 }
