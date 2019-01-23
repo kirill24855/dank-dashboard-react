@@ -8,12 +8,15 @@ import "./Globe.css";
  * Done with globe and country borders
  * TODO Now, looking for a higher-res globe texture, maybe
  * Also need to get data for all states of the US, and maybe other large countries like Russia, Canada, etc
- * TODO Gotta configure some type of networking and listening for data from a server, so as to update the sticks in real time
+ * Gotta configure some type of networking and listening for data from a server, so as to update the sticks in real time
  * 		actually no, bad idea. the super component should do that, and just give the globe what it needs. eNcApSuLaTiOn
  * TODO Add labels to countries and sticks?
  * TODO Make sticks' length represent a number (people or some such)
  * 		already kinda happening, the size/length is decided by the super so its up to that component
- * TODO Change appearance of sticks to signify important notifications (errors, closed deals, etc)
+ * Change appearance of sticks to signify important notifications (errors, closed deals, etc)
+ * TODO Border glow? maybe sticks too
+ * TODO Stick animations
+ * 		done with new stick animation, need the removal
  *
  * Write functionality for the FOCUS POINT, to rotate the globe to given coordinates in response to an event (errors, closed deals, etc)
  *
@@ -22,10 +25,14 @@ import "./Globe.css";
 
 let defaultMarkerColor = 0x9ff9ff;
 let defaultBorderColor = 0x4cc4ff;
-let defaultStickColor = 0x4cc4ff;
-let errorStickColor = 0xff6e59;
 
-let defaultGlowColor = defaultMarkerColor;
+let defaultStickColor = defaultBorderColor;
+let defaultNewStickColor = 0x51e85b;
+let defaultWarningStickColor = 0xffe759;
+let defaultErrorStickColor = 0xff6e59;
+
+let defaultEarthGlowColor = defaultMarkerColor;
+//let defaultBorderGlowColor = defaultWarningStickColor;
 
 export default class Globe extends Component {
 
@@ -35,7 +42,8 @@ export default class Globe extends Component {
 		markerColor: PropTypes.number,
 		//countryFillColor: PropTypes.string,
 
-		glowColor: PropTypes.number,
+		earthGlowColor: PropTypes.number,
+		borderGlowColor: PropTypes.number,
 
 		fovY: PropTypes.number,
 		zoom: PropTypes.number,
@@ -44,11 +52,16 @@ export default class Globe extends Component {
 
 		sticks: PropTypes.array,
 		stickWidth: PropTypes.number,
-		defaultStickColor: PropTypes.string,
-		errorStickColor: PropTypes.string,
+
+		normalStickColor: PropTypes.number,
+		newStickColor: PropTypes.number,
+		warningStickColor: PropTypes.number,
+		errorStickColor: PropTypes.number,
 
 		focusPoint: PropTypes.object,
-		animationDuration: PropTypes.number,
+		focusDuration: PropTypes.number,
+
+		newStickAnimationDuration: PropTypes.number,
 
 		onChange: PropTypes.func.isRequired,
 		onGlobeClick: PropTypes.func.isRequired,
@@ -57,8 +70,10 @@ export default class Globe extends Component {
 	state = {
 		markerMaterial: new THREE.LineBasicMaterial({color: this.props.markerColor || defaultMarkerColor}),
 		borderMaterial: new THREE.LineBasicMaterial({color: this.props.borderColor || defaultBorderColor}),
-		defaultStickMaterial: new THREE.MeshPhongMaterial({color: this.props.defaultStickColor || defaultStickColor}),
-		errorStickMaterial: new THREE.MeshPhongMaterial({color: this.props.errorStickColor || errorStickColor}),
+		normalStickMaterial: new THREE.MeshPhongMaterial({color: this.props.normalStickColor || defaultStickColor}),
+		newStickMaterial: new THREE.MeshPhongMaterial({color: this.props.newStickColor || defaultNewStickColor}),
+		warningStickMaterial: new THREE.MeshPhongMaterial({color: this.props.warningStickColor || defaultWarningStickColor}),
+		errorStickMaterial: new THREE.MeshPhongMaterial({color: this.props.errorStickColor || defaultErrorStickColor}),
 
 		stickWidth: this.props.stickWidth || 0.005,
 
@@ -114,6 +129,8 @@ export default class Globe extends Component {
 		//geojson.features = geojson.features.filter(rec => rec.properties.NAME === "Greenland");
 		//debugger;
 
+		//let glowMaterial = this.getGlowMaterial(0.4, 6, this.props.borderGlowColor || defaultBorderGlowColor);
+
 		// every country
 		for (let i = 0; i < geojson.features.length; i++) {
 			//let i = 144;
@@ -142,6 +159,10 @@ export default class Globe extends Component {
 				geometry.vertices = coordinates;
 				let line = new THREE.Line(geometry, this.state.borderMaterial);
 				earth.add(line);
+
+				//let glow = new THREE.Line(geometry, glowMaterial);
+				//glow.scale.multiplyScalar(1.01);
+				//earth.add(glow);
 			}
 		}
 	}
@@ -160,30 +181,77 @@ export default class Globe extends Component {
 		return hSquared/*/bSquared*/ < threshold;
 	}
 
+	getGlowMaterial(c, p, color) {
+		return new THREE.ShaderMaterial({
+			uniforms: {
+				"c": {type: "f", value: c},
+				"p": {type: "f", value: p},
+				glowColor: {type: "c", value: new THREE.Color(color)},
+				viewVector: {type: "v3", value: this.gCamera.position}
+			},
+			vertexShader: `
+					uniform vec3 viewVector;
+					uniform float c;
+					uniform float p;
+					varying float intensity;
+					void main() 
+					{
+						vec3 vNormal = normalize( normalMatrix * normal );
+						vec3 vNormel = normalize( normalMatrix * viewVector );
+						intensity = pow( c - dot(vNormal, vNormel), p );
+						
+						gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+					}
+			`,
+			fragmentShader: `
+					uniform vec3 glowColor;
+					varying float intensity;
+					void main() 
+					{
+						vec3 glow = glowColor * intensity;
+						gl_FragColor = vec4( glow, 1.0 );
+					}
+			`,
+			side: THREE.BackSide,
+			blending: THREE.AdditiveBlending,
+			transparent: true,
+		});
+	}
+
 	addStick(lat, lng, length, type) {
-		let material = this.state.defaultStickMaterial;
+		let material = this.state.normalStickMaterial;
 		if (type === "error") material = this.state.errorStickMaterial;
 
-		let geometry = new THREE.BoxGeometry(this.state.stickWidth, this.state.stickWidth, length, 1, 1, 1);
+		let geometry = new THREE.BoxGeometry(this.state.stickWidth, this.state.stickWidth, length);
 		let stickMesh = new THREE.Mesh(geometry, material);
 		let pivot = new THREE.Object3D();
 		pivot.add(stickMesh);
-		stickMesh.position.set(0, 0, 1 + length/2);
+		stickMesh.position.set(0, 0, 1 - length/2);
 
 		this.rotateObjAroundOrigin(pivot, lat, lng);
 
-		this.gSticks.add(pivot);
+		this.gSticks.toRender.add(pivot);
+
+		return stickMesh;
 	}
 
 	addSticks(sticks) {
-		this.gScene.remove(this.gSticks);
-		this.gSticks = new THREE.Group();
-		this.gScene.add(this.gSticks);
-
-		for (let i in sticks) {
+		for (let i in sticks) { // add new sticks
 			let stick = sticks[i];
 
-			this.addStick(stick.lat, stick.lng, stick.size, stick.type);
+			if (this.gSticks.fromSource.some(s => s.lat === stick.lat && s.lng === stick.lng && s.size === stick.size && s.type === stick.type)) continue;
+
+			let s = this.addStick(stick.lat, stick.lng, stick.size, stick.type);
+			this.gSticks.fromSource.push(Object.assign(stick, {toRender: s, addTime: Date.now()}));
+		}
+
+		for (let i in this.gSticks.fromSource) { // remove old sticks
+			let stick = this.gSticks.fromSource[i];
+
+			if (sticks.some(s => s.lat === stick.lat && s.lng === stick.lng && s.size === stick.size && s.type === stick.type)) continue;
+
+			this.gSticks.fromSource.splice(i, 1);
+			this.gSticks.toRender.children.splice(i, 1);
 		}
 
 		//this.draw();
@@ -243,7 +311,6 @@ export default class Globe extends Component {
 
 		this.gScene = new THREE.Scene();
 		this.gCamera = new THREE.PerspectiveCamera(this.props.fovY || 75, width/height, 0.1, 10); // set the far value at 1.55 to not render the back of the globe
-		this.gCamera.fovX = 2 * Math.atan(Math.tan(this.gCamera.fov / 2 * Math.PI / 180) * this.gCamera.aspect) * 180 / Math.PI;
 
 		this.gCamera.distance = this.props.zoom + 1 || 2;
 		this.gCamera.position.z = this.gCamera.distance;
@@ -294,13 +361,15 @@ export default class Globe extends Component {
 		// not sure if this is anti-pattern TODO figure out if this is anti-pattern
 		document.addEventListener("mouseup", () => this.isDragging = false);
 
-		this.gSticks = new THREE.Group();
-		this.gScene.add(this.gSticks);
+		this.gSticks = {};
+		this.gSticks.toRender = new THREE.Group();
+		this.gScene.add(this.gSticks.toRender);
+		this.gSticks.fromSource = [];
 
 		this.gScene.add(new THREE.AmbientLight(0xffffff, 1));
 
-		this.gAnimation = {
-			duration: this.props.animationDuration || 1000,
+		this.gFocus = {
+			duration: this.props.focusDuration || 1000,
 			startTime: 0,
 			startLoc: {
 				lat: 0,
@@ -320,40 +389,7 @@ export default class Globe extends Component {
 			earth.add(mesh);
 
 			// earth glow
-			let glowMaterial = new THREE.ShaderMaterial({
-				uniforms: {
-					"c": {type: "f", value: 0.4},
-					"p": {type: "f", value: 6},
-					glowColor: {type: "c", value: new THREE.Color(this.props.glowColor || defaultGlowColor)},
-					viewVector: {type: "v3", value: this.gCamera.position}
-				},
-				vertexShader: `
-					uniform vec3 viewVector;
-					uniform float c;
-					uniform float p;
-					varying float intensity;
-					void main() 
-					{
-						vec3 vNormal = normalize( normalMatrix * normal );
-						vec3 vNormel = normalize( normalMatrix * viewVector );
-						intensity = pow( c - dot(vNormal, vNormel), p );
-						
-						gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-					}
-				`,
-				fragmentShader: `
-					uniform vec3 glowColor;
-					varying float intensity;
-					void main() 
-					{
-						vec3 glow = glowColor * intensity;
-						gl_FragColor = vec4( glow, 1.0 );
-					}
-				`,
-				side: THREE.BackSide,
-				blending: THREE.AdditiveBlending,
-				transparent: true,
-			});
+			let glowMaterial = this.getGlowMaterial(0.4, 6, this.props.earthGlowColor || defaultEarthGlowColor);
 			let earthGlow = new THREE.Mesh(geometry, glowMaterial);
 			earthGlow.scale.multiplyScalar(1.55);
 			earth.add(earthGlow);
@@ -386,10 +422,10 @@ export default class Globe extends Component {
 		return true;
 	}*/
 
-	componentDidUpdate(prevProps, prevState, snapshot) {
+	componentDidUpdate(prevProps) {
 		if (this.props.focusPoint !== prevProps.focusPoint && this.props.focusPoint != null) {
 			this.setState({focusing: true});
-			this.gAnimation.startTime = Date.now();
+			this.gFocus.startTime = Date.now();
 
 			let startLat = this.gCamera.rot.lat;
 			let startLng = this.gCamera.rot.lng;
@@ -400,7 +436,7 @@ export default class Globe extends Component {
 			stdDist = this.props.focusPoint.lng - startLng;
 			if (Math.abs(stdDist) > 180) startLng += 720;
 
-			this.gAnimation.startLoc = {lat: startLat, lng: startLng};
+			this.gFocus.startLoc = {lat: startLat, lng: startLng};
 			//requestAnimationFrame(this.animate);
 		}
 
@@ -419,8 +455,11 @@ export default class Globe extends Component {
 		else {
 			if (!this.gCamera.userData.lastRenderTime) this.gCamera.userData.lastRenderTime = timestamp;
 			this.gCamera.rot.lng += this.ambientRotationRate*(timestamp - this.gCamera.userData.lastRenderTime)/1000;
+			if (this.gCamera.rot.lng > 180) this.gCamera.rot.lng -= 360;
 			this.rotateCamera();
 		}
+
+		this.animateSticks();
 
 		this.draw();
 		this.gCamera.userData.lastRenderTime = timestamp;
@@ -429,17 +468,30 @@ export default class Globe extends Component {
 
 	focus() {
 		let curTime = Date.now();
-		this.gAnimation.curProgress = curTime - this.gAnimation.startTime;
-		if (this.gAnimation.curProgress > this.gAnimation.duration) {
+		this.gFocus.curProgress = curTime - this.gFocus.startTime;
+		if (this.gFocus.curProgress > this.gFocus.duration) {
 			this.setState({focusing: false});
-			this.gAnimation.curProgress = this.gAnimation.duration;
+			this.gFocus.curProgress = this.gFocus.duration;
 		}
 
-		let progress = this.gAnimation.curProgress / this.gAnimation.duration;
-		this.gCamera.rot.lat = (this.props.focusPoint.lat - this.gAnimation.startLoc.lat) * Globe.d(progress) + this.gAnimation.startLoc.lat;
-		this.gCamera.rot.lng = (this.props.focusPoint.lng - this.gAnimation.startLoc.lng) * Globe.d(progress) + this.gAnimation.startLoc.lng;
+		let progress = this.gFocus.curProgress / this.gFocus.duration;
+		this.gCamera.rot.lat = (this.props.focusPoint.lat - this.gFocus.startLoc.lat) * Globe.d(progress) + this.gFocus.startLoc.lat;
+		this.gCamera.rot.lng = (this.props.focusPoint.lng - this.gFocus.startLoc.lng) * Globe.d(progress) + this.gFocus.startLoc.lng;
 
 		this.rotateCamera();
+	}
+
+	animateSticks() {
+		let curTime = Date.now();
+
+		for (let i in this.gSticks.fromSource) {
+			let stick = this.gSticks.fromSource[i];
+
+			let lifeLength = curTime - stick.addTime;
+			if (lifeLength > 1000) continue;
+
+			stick.toRender.position.z = 1 + stick.size * (Globe.d(lifeLength/1000)-0.5);
+		}
 	}
 
 	// TODO find a better name - mathematical functions usually have 1-letter names, but that's discouraged in JS
