@@ -16,7 +16,7 @@ import "./Globe.css";
  * Change appearance of sticks to signify important notifications (errors, closed deals, etc)
  * TODO Border glow? maybe sticks too
  * TODO Stick animations
- * 		done with new stick animation, need the removal
+ * 		done with new stick animation, need the removal (https://threejs.org/docs/#manual/en/introduction/How-to-update-things)
  *
  * Write functionality for the FOCUS POINT, to rotate the globe to given coordinates in response to an event (errors, closed deals, etc)
  *
@@ -236,7 +236,12 @@ export default class Globe extends Component {
 	}
 
 	addSticks(sticks) {
-		for (let i in sticks) { // add new sticks
+
+		/*console.log("before array modifications");
+		console.log("prop sticks:", sticks);
+		console.log("local sticks:", this.gSticks.fromSource);*/
+
+		for (let i = 0; i < sticks.length; i++) { // add new sticks
 			let stick = sticks[i];
 
 			if (this.gSticks.fromSource.some(s => s.lat === stick.lat && s.lng === stick.lng && s.size === stick.size && s.type === stick.type)) continue;
@@ -245,7 +250,7 @@ export default class Globe extends Component {
 			this.gSticks.fromSource.push(Object.assign(stick, {toRender: s, addTime: Date.now()}));
 		}
 
-		for (let i in this.gSticks.fromSource) { // remove old sticks
+		for (let i = sticks.length-1; i >= 0; i--) { // remove old sticks
 			let stick = this.gSticks.fromSource[i];
 
 			if (sticks.some(s => s.lat === stick.lat && s.lng === stick.lng && s.size === stick.size && s.type === stick.type)) continue;
@@ -253,6 +258,11 @@ export default class Globe extends Component {
 			this.gSticks.fromSource.splice(i, 1);
 			this.gSticks.toRender.children.splice(i, 1);
 		}
+
+		/*console.log("after array modifications");
+		console.log("local sticks:", this.gSticks.fromSource);
+
+		*/console.log(this.gSticks.fromSource.length - sticks.length);
 
 		//this.draw();
 	}
