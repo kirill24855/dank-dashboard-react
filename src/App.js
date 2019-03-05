@@ -75,6 +75,8 @@ class App extends Component {
 					<Globe
 						focusPoint={this.state.focusPoint}
 						sticks={this.state.sticks}
+						stickWidth={0.008}
+						eventDisplayType={"circles"}
 						onChange={this.handleGlobeChange.bind(this)}
 						onGlobeClick={this.onGlobeClick.bind(this)}
 					/>

@@ -15,8 +15,8 @@ import "./Globe.css";
  * 		already kinda happening, the size/length is decided by the super so its up to that component
  * Change appearance of sticks to signify important notifications (errors, closed deals, etc)
  * TODO Border glow? maybe sticks too
- * TODO Stick animations
- * 		done with new stick animation, need the removal (https://threejs.org/docs/#manual/en/introduction/How-to-update-things)
+ * Stick animations - go away from traditional actual sticks and instead to like circles emanating from the globe
+ * 		TODO Now make it actually look good
  *
  * Write functionality for the FOCUS POINT, to rotate the globe to given coordinates in response to an event (errors, closed deals, etc)
  *
@@ -58,6 +58,8 @@ export default class Globe extends Component {
 		warningStickColor: PropTypes.number,
 		errorStickColor: PropTypes.number,
 
+		eventDisplayType: PropTypes.string,
+
 		focusPoint: PropTypes.object,
 		focusDuration: PropTypes.number,
 
@@ -76,6 +78,8 @@ export default class Globe extends Component {
 		errorStickMaterial: new THREE.MeshPhongMaterial({color: this.props.errorStickColor || defaultErrorStickColor}),
 
 		stickWidth: this.props.stickWidth || 0.005,
+
+		eventDisplayType: this.props.eventDisplayType || "sticks",
 
 		xAxis: new THREE.Vector3(1, 0, 0),
 		yAxis: new THREE.Vector3(0, 1, 0),
@@ -218,6 +222,7 @@ export default class Globe extends Component {
 		});
 	}
 
+	// OLD - creates an actual stick, use spawnCircle instead to form imaginary sticks
 	addStick(lat, lng, length, type) {
 		let material = this.state.normalStickMaterial;
 		if (type === "error") material = this.state.errorStickMaterial;
@@ -232,22 +237,39 @@ export default class Globe extends Component {
 
 		this.gSticks.toRender.add(pivot);
 
-		return stickMesh;
+		return pivot;
+	}
+
+	spawnCircle(lat, lng, size, type) {
+		let material = this.state.normalStickMaterial;
+		if (type === "error") material = this.state.errorStickMaterial;
+
+		let geometry = new THREE.SphereGeometry(size/10, 10, 10);
+		let mesh = new THREE.Mesh(geometry, material);
+		let pivot = new THREE.Object3D();
+		pivot.add(mesh);
+		pivot.userData.mesh = mesh;
+		mesh.position.set(0, 0, 1);
+		mesh.userData.spawnTime = Date.now();
+
+		this.rotateObjAroundOrigin(pivot, lat, lng);
+
+		this.gSticks.toRender.add(pivot);
 	}
 
 	addSticks(sticks) {
-
-		/*console.log("before array modifications");
-		console.log("prop sticks:", sticks);
-		console.log("local sticks:", this.gSticks.fromSource);*/
-
 		for (let i = 0; i < sticks.length; i++) { // add new sticks
 			let stick = sticks[i];
 
 			if (this.gSticks.fromSource.some(s => s.lat === stick.lat && s.lng === stick.lng && s.size === stick.size && s.type === stick.type)) continue;
 
-			let s = this.addStick(stick.lat, stick.lng, stick.size, stick.type);
-			this.gSticks.fromSource.push(Object.assign(stick, {toRender: s, addTime: Date.now()}));
+			if (this.state.eventDisplayType === "sticks") {
+				let p = this.addStick(stick.lat, stick.lng, stick.size, stick.type);
+				this.gSticks.fromSource.push(Object.assign(stick, {toRender: p, addTime: Date.now()}));
+			} else if (this.state.eventDisplayType === "circles") {
+				let id = setInterval(() => this.spawnCircle(stick.lat, stick.lng, stick.size, stick.type), 100);
+				this.gSticks.fromSource.push(Object.assign(stick, {intervalID: id, addTime: Date.now()}));
+			}
 		}
 
 		for (let i = sticks.length-1; i >= 0; i--) { // remove old sticks
@@ -255,16 +277,15 @@ export default class Globe extends Component {
 
 			if (sticks.some(s => s.lat === stick.lat && s.lng === stick.lng && s.size === stick.size && s.type === stick.type)) continue;
 
+			if (this.state.eventDisplayType === "circles") {
+				console.log(stick.intervalID);
+				clearInterval(stick.intervalID); // TODO figure out why the fuck intervalID isnt purple
+			} else if (this.state.eventDisplayType === "sticks") {
+				let index = this.gSticks.toRender.children.indexOf(stick.toRender);
+				this.gSticks.toRender.children.splice(index, 1);
+			}
 			this.gSticks.fromSource.splice(i, 1);
-			this.gSticks.toRender.children.splice(i, 1);
 		}
-
-		/*console.log("after array modifications");
-		console.log("local sticks:", this.gSticks.fromSource);
-
-		*/console.log(this.gSticks.fromSource.length - sticks.length);
-
-		//this.draw();
 	}
 
 	rotateObjAroundOrigin(pivot, lat, lng) {
@@ -320,6 +341,7 @@ export default class Globe extends Component {
 		let height = this.mount.clientHeight;
 
 		this.gScene = new THREE.Scene();
+		this.gScene.matrixAutoUpdate = false;
 		this.gCamera = new THREE.PerspectiveCamera(this.props.fovY || 75, width/height, 0.1, 10); // set the far value at 1.55 to not render the back of the globe
 
 		this.gCamera.distance = this.props.zoom + 1 || 2;
@@ -396,6 +418,7 @@ export default class Globe extends Component {
 			let material = new THREE.MeshBasicMaterial({map: tex, overdraw: 0.5/*color: 0x050505*/});
 			let mesh = new THREE.Mesh(geometry, material);
 			mesh.rotateY(3*Math.PI/2);
+			mesh.doubleSided = false;
 			earth.add(mesh);
 
 			// earth glow
@@ -417,6 +440,8 @@ export default class Globe extends Component {
 		this.addMarkersToScene(2, 12, earth);
 
 		this.gScene.userData.earth = earth;
+
+		window.setInterval(() => console.log(this.gSticks.toRender.children.length), 1000);
 
 		this.mount.appendChild(this.gRenderer.domElement);
 	}
@@ -491,16 +516,28 @@ export default class Globe extends Component {
 		this.rotateCamera();
 	}
 
+	// Animates by moving the sticks out of the globe. Doesn't work if the sticks are long.
+	// https://threejs.org/docs/#manual/en/introduction/How-to-update-things
 	animateSticks() {
 		let curTime = Date.now();
 
-		for (let i in this.gSticks.fromSource) {
-			let stick = this.gSticks.fromSource[i];
+		if (this.state.eventDisplayType === "sticks") {
+			for (let i in this.gSticks.fromSource) {
+				let stick = this.gSticks.fromSource[i];
 
-			let lifeLength = curTime - stick.addTime;
-			if (lifeLength > 1000) continue;
+				let lifeLength = curTime - stick.addTime;
+				if (lifeLength > 1000) continue;
 
-			stick.toRender.position.z = 1 + stick.size * (Globe.d(lifeLength/1000)-0.5);
+				stick.toRender.children[0].position.z = 1 + stick.size * (Globe.d(lifeLength/1000)-0.5);
+			}
+		} else if (this.state.eventDisplayType === "circles") {
+			for (let i = this.gSticks.toRender.children.length-1; i >= 0; i--) {
+				let circle = this.gSticks.toRender.children[i].userData.mesh;
+
+				let lifeLength = curTime - circle.userData.spawnTime;
+				if (lifeLength > 1000) this.gSticks.toRender.children.splice(i, 1);
+				else circle.position.z = 1 + Globe.d(lifeLength/1000)*0.1;
+			}
 		}
 	}
 
