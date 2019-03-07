@@ -4,19 +4,19 @@ self.__precacheManifest = [
     "url": "/dank-dashboard-react/static/js/runtime~main.fccdf1f5.js"
   },
   {
-    "revision": "c9063211a0a952015244",
-    "url": "/dank-dashboard-react/static/js/main.c9063211.chunk.js"
+    "revision": "06bf117b485349756098",
+    "url": "/dank-dashboard-react/static/js/main.06bf117b.chunk.js"
   },
   {
     "revision": "a20579c859cf4cd8adee",
     "url": "/dank-dashboard-react/static/js/1.a20579c8.chunk.js"
   },
   {
-    "revision": "c9063211a0a952015244",
+    "revision": "06bf117b485349756098",
     "url": "/dank-dashboard-react/static/css/main.577574a5.chunk.css"
   },
   {
-    "revision": "8b8961fcd6146a91c2f4b161cd898d35",
+    "revision": "709cfa8ac89892137a516a9451c12a87",
     "url": "/dank-dashboard-react/index.html"
   }
 ];
